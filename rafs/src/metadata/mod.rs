@@ -254,6 +254,8 @@ bitflags! {
         const COMPRESS_GZIP = 0x0000_0040;
         // V5: Data chunks are compressed with zstd
         const COMPRESS_ZSTD = 0x0000_0080;
+        // V5: Data chunks are compressed with lz4_qatzip
+        const COMPRESS_LZ4_QATZIP = 0x0000_0100;
     }
 }
 

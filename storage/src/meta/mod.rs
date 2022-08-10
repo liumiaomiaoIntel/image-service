@@ -90,6 +90,8 @@ impl BlobMetaHeaderOndisk {
             compress::Algorithm::GZip
         } else if self.s_ci_compressor == compress::Algorithm::Zstd as u32 {
             compress::Algorithm::Zstd
+        } else if self.s_ci_compressor == compress::Algorithm::Lz4qatzip as u32 {
+            compress::Algorithm::Lz4qatzip
         } else {
             compress::Algorithm::None
         }
@@ -1158,4 +1160,88 @@ mod tests {
 
         assert_eq!(buffer, data);
     }
+    
+    #[test]
+    fn test_read_metadata_compressor_lz4_qatzip() {
+        let temp = TempFile::new().unwrap();
+        let mut w = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .open(temp.as_path())
+            .unwrap();
+        let r = OpenOptions::new()
+            .read(true)
+            .write(false)
+            .open(temp.as_path())
+            .unwrap();
+
+        let chunks = vec![
+            BlobChunkInfoOndisk {
+                uncomp_info: 0x01ff_f000_0000_0000,
+                comp_info: 0x00ff_f000_0000_0000,
+            },
+            BlobChunkInfoOndisk {
+                uncomp_info: 0x01ff_f000_0010_0000,
+                comp_info: 0x00ff_f000_0010_0000,
+            },
+            BlobChunkInfoOndisk {
+                uncomp_info: 0x01ff_f000_0000_0000,
+                comp_info: 0x00ff_f000_0000_0000,
+            },
+            BlobChunkInfoOndisk {
+                uncomp_info: 0x01ff_f000_0010_0000,
+                comp_info: 0x00ff_f000_0010_0000,
+            },
+            BlobChunkInfoOndisk {
+                uncomp_info: 0x01ff_f000_0000_0000,
+                comp_info: 0x00ff_f000_0000_0000,
+            },
+            BlobChunkInfoOndisk {
+                uncomp_info: 0x01ff_f000_0010_0000,
+                comp_info: 0x00ff_f000_0010_0000,
+            },
+        ];
+
+        let data = unsafe {
+            std::slice::from_raw_parts(
+                chunks.as_ptr() as *const u8,
+                chunks.len() * std::mem::size_of::<BlobChunkInfoOndisk>(),
+            )
+        };
+
+        let (buf, compressed) = compress::compress(data, compress::Algorithm::Lz4qatzip).unwrap();
+        assert!(compressed);
+
+        let pos = 0;
+        w.write_all(&buf).unwrap();
+
+        let compressed_size = buf.len();
+        let uncompressed_size = data.len();
+        let mut blob_info = BlobInfo::new(
+            0,
+            "dummy".to_string(),
+            0,
+            0,
+            RAFS_MAX_CHUNK_SIZE as u32,
+            0,
+            BlobFeatures::default(),
+        );
+        blob_info.set_blob_meta_info(
+            0,
+            pos,
+            compressed_size as u64,
+            uncompressed_size as u64,
+            compress::Algorithm::Lz4qatzip as u32,
+        );
+
+        let mut buffer = alloc_buf(uncompressed_size);
+        let reader: Arc<dyn BlobReader> = Arc::new(DummyBlobReader {
+            metrics: BackendMetrics::new("dummy", "localfs"),
+            file: r,
+        });
+        BlobMetaInfo::read_metadata(&blob_info, &reader, &mut buffer).unwrap();
+
+        assert_eq!(buffer, data);
+    }
+    
 }

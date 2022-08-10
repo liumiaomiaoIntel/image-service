@@ -113,6 +113,7 @@ impl From<RafsSuperFlags> for compress::Algorithm {
             x if x.contains(RafsSuperFlags::COMPRESS_LZ4_BLOCK) => compress::Algorithm::Lz4Block,
             x if x.contains(RafsSuperFlags::COMPRESS_GZIP) => compress::Algorithm::GZip,
             x if x.contains(RafsSuperFlags::COMPRESS_ZSTD) => compress::Algorithm::Zstd,
+            x if x.contains(RafsSuperFlags::COMPRESS_LZ4_QATZIP) => compress::Algorithm::Lz4qatzip,
             _ => compress::Algorithm::Lz4Block,
         }
     }
@@ -125,6 +126,7 @@ impl From<compress::Algorithm> for RafsSuperFlags {
             compress::Algorithm::Lz4Block => RafsSuperFlags::COMPRESS_LZ4_BLOCK,
             compress::Algorithm::GZip => RafsSuperFlags::COMPRESS_GZIP,
             compress::Algorithm::Zstd => RafsSuperFlags::COMPRESS_ZSTD,
+            compress::Algorithm::Lz4qatzip => RafsSuperFlags::COMPRESS_LZ4_QATZIP,
         }
     }
 }
@@ -268,6 +270,7 @@ impl RafsV5SuperBlock {
         self.s_flags &= !RafsSuperFlags::COMPRESS_LZ4_BLOCK.bits();
         self.s_flags &= !RafsSuperFlags::COMPRESS_GZIP.bits();
         self.s_flags &= !RafsSuperFlags::COMPRESS_ZSTD.bits();
+        self.s_flags &= !RafsSuperFlags::COMPRESS_LZ4_QATZIP.bits();
         self.s_flags |= c.bits();
     }
 
@@ -1755,6 +1758,10 @@ pub mod tests {
         );
 
         assert_eq!(
+            RafsSuperFlags::from(compress::Algorithm::Lz4qatzip),
+            RafsSuperFlags::COMPRESS_LZ4_QATZIP
+        );
+        assert_eq!(
             RafsSuperFlags::from(compress::Algorithm::Zstd),
             RafsSuperFlags::COMPRESS_ZSTD
         );
@@ -1769,6 +1776,10 @@ pub mod tests {
         assert_eq!(
             RafsSuperFlags::from(compress::Algorithm::None),
             RafsSuperFlags::COMPRESS_NONE
+        );
+        assert_eq!(
+            compress::Algorithm::from(RafsSuperFlags::COMPRESS_LZ4_QATZIP),
+            compress::Algorithm::Lz4qatzip
         );
         assert_eq!(
             compress::Algorithm::from(RafsSuperFlags::COMPRESS_ZSTD),
