@@ -299,6 +299,8 @@ impl BlobInfo {
             compress::Algorithm::GZip
         } else if self.meta_ci_compressor == compress::Algorithm::Zstd as u32 {
             compress::Algorithm::Zstd
+        } else if self.meta_ci_compressor == compress::Algorithm::Lz4qatzip as u32 {
+            compress::Algorithm::Lz4qatzip
         } else {
             compress::Algorithm::None
         }

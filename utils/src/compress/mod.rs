@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+
 use std::borrow::Cow;
 use std::convert::TryFrom;
 use std::fmt;
@@ -19,6 +20,9 @@ use self::lz4_standard::*;
 mod zstd_standard;
 use self::zstd_standard::*;
 
+mod lz4_qatzip;
+use self::lz4_qatzip::*;
+
 const COMPRESSION_MINIMUM_RATIO: usize = 100;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -27,6 +31,7 @@ pub enum Algorithm {
     Lz4Block,
     GZip,
     Zstd,
+    Lz4qatzip,
 }
 
 impl Default for Algorithm {
@@ -50,6 +55,7 @@ impl FromStr for Algorithm {
             "lz4_block" => Ok(Self::Lz4Block),
             "gzip" => Ok(Self::GZip),
             "zstd" => Ok(Self::Zstd),
+            "lz4_qatzip" => Ok(Self::Lz4qatzip),
             _ => Err(einval!("compression algorithm should be none or lz4_block")),
         }
     }
@@ -67,6 +73,8 @@ impl TryFrom<u32> for Algorithm {
             Ok(Algorithm::GZip)
         } else if value == Algorithm::Zstd as u32 {
             Ok(Algorithm::Zstd)
+        } else if value == Algorithm::Lz4qatzip as u32 {
+            Ok(Algorithm::Lz4qatzip)
         } else {
             Err(())
         }
@@ -102,6 +110,7 @@ pub fn compress(src: &[u8], algorithm: Algorithm) -> Result<(Cow<[u8]>, bool)> {
             gz.finish()?
         }
         Algorithm::Zstd => zstd_compress(src)?,
+        Algorithm::Lz4qatzip => lz4_qatzip_compress(src)?,
     };
 
     // Abandon compressed data when compression ratio greater than COMPRESSION_MINIMUM_RATIO
@@ -136,6 +145,7 @@ pub fn decompress(
             Ok(dst.len())
         }
         Algorithm::Zstd => zstd_decompress(src, dst),
+        Algorithm::Lz4qatzip => lz4_qatzip_decompress(src, dst),
     }
 }
 
@@ -294,6 +304,23 @@ mod tests {
 
         assert_eq!(sz, 4097);
         assert_eq!(buf, decompressed);
+    }
+
+    #[test]
+    fn test_lz4qatzip_compress_decompress_65580_bytes() {
+        let buf = vec![0x2u8; 1800];
+        let compressed = lz4_qatzip_compress(&buf).unwrap();
+        let mut decompressed = vec![0; buf.len()];
+        let sz = decompress(
+            &compressed,
+            None,
+            decompressed.as_mut_slice(),
+            Algorithm::Lz4qatzip,
+        )
+        .unwrap();
+        
+        assert_eq!(sz, 1800);
+        assert_eq!(buf, decompressed);   
     }
 
     #[test]

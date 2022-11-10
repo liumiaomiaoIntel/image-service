@@ -1,6 +1,9 @@
 // Copyright 2020 Ant Group. All rights reserved.
 //
 // SPDX-License-Identifier: Apache-2.0
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
 
 #[macro_use]
 extern crate log;
@@ -11,6 +14,7 @@ extern crate serde;
 #[macro_use]
 extern crate lazy_static;
 
+include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 use std::convert::{Into, TryFrom, TryInto};
 
 pub use self::exec::*;
