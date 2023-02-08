@@ -42,7 +42,7 @@ vm-memory = { version = "0.8.0", features = ["backend-mmap"], optional = true }
 chrono = "0.4.19"
 openssl = { version = "0.10.40", features = ["vendored"] }
 # pin openssl-src to bring in fix for https://rustsec.org/advisories/RUSTSEC-2022-0032
-openssl-src = { version = "111.22" }
+openssl-src = { version = "111.25" }
 hyperlocal = "0.8.0"
 tokio = { version = "1.20.3", features = ["macros"] }
 hyper = "0.14.11"
