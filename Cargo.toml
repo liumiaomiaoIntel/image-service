@@ -40,7 +40,7 @@ base64 = "0.13.0"
 rust-fsm = "0.6.0"
 vm-memory = { version = "0.8.0", features = ["backend-mmap"], optional = true }
 chrono = "0.4.19"
-openssl = { version = "0.10.40", features = ["vendored"] }
+openssl = { version = "0.10.48", features = ["vendored"] }
 # pin openssl-src to bring in fix for https://rustsec.org/advisories/RUSTSEC-2022-0032
 openssl-src = { version = "111.22" }
 hyperlocal = "0.8.0"
