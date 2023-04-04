@@ -8,7 +8,7 @@ require (
 	github.com/containerd/containerd v1.6.6
 	github.com/docker/cli v20.10.0-beta1.0.20201029214301-1d20b15adc38+incompatible
 	github.com/docker/distribution v2.8.1+incompatible
-	github.com/docker/docker v20.10.0-beta1.0.20201110211921-af34b94a78a1+incompatible // indirect
+	github.com/docker/docker v20.10.24+incompatible // indirect
 	github.com/dustin/go-humanize v1.0.0
 	github.com/google/uuid v1.2.0
 	github.com/opencontainers/go-digest v1.0.0
