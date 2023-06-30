@@ -1160,7 +1160,7 @@ mod tests {
 
         assert_eq!(buffer, data);
     }
-    
+
     #[test]
     fn test_read_metadata_compressor_lz4_qatzip() {
         let temp = TempFile::new().unwrap();
@@ -1243,5 +1243,4 @@ mod tests {
 
         assert_eq!(buffer, data);
     }
-    
 }

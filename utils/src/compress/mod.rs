@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-
 use std::borrow::Cow;
 use std::convert::TryFrom;
 use std::fmt;
@@ -308,7 +307,7 @@ mod tests {
 
     #[test]
     fn test_lz4qatzip_compress_decompress_65580_bytes() {
-        let buf = vec![0x2u8; 1800];
+        let buf = vec![0x2u8; 65580];
         let compressed = lz4_qatzip_compress(&buf).unwrap();
         let mut decompressed = vec![0; buf.len()];
         let sz = decompress(
@@ -318,9 +317,9 @@ mod tests {
             Algorithm::Lz4qatzip,
         )
         .unwrap();
-        
-        assert_eq!(sz, 1800);
-        assert_eq!(buf, decompressed);   
+
+        assert_eq!(sz, 65580);
+        assert_eq!(buf, decompressed);
     }
 
     #[test]
